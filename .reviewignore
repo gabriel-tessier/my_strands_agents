@@ -1,0 +1,12 @@
+# Ignore migrations
+**/migrations/**
+
+# Ignore virtual environments
+venv/
+.env/
+
+# Ignore tests
+tests/**
+
+# Ignore settings
+settings/**.py
