@@ -1,115 +1,120 @@
 Hello world and tests using strands agent python sdk.
 
-> agent.py
+## Agents
 
-hello world copy paste from the strands agent Quick start
-https://github.com/strands-agents/sdk-python
+### `my_strands_agents.agent`
 
-> code_review_agent.py
+Hello-world copy-paste from the [Strands Agents Quick Start](https://github.com/strands-agents/sdk-python).
+Demonstrates a custom `letter_counter` tool alongside the built-in `calculator` and `current_time` tools.
 
-Vide coding to test a local AI‑powered code review agent using:
+### `my_strands_agents.code_review`
 
-    Strands Agents SDK
-    Ollama
-    Parallel file review
-    Repository walking tool
-    Ignore file support (.reviewignore)
+Vibe-coded, local AI-powered code review agent using:
 
-🚀 Installation
-1. Install Python dependencies
+- Strands Agents SDK
+- Ollama
+- Parallel file review
+- Repository walking tool
+- Ignore file support (`.reviewignore`)
+
+## 🚀 Installation
+
+### 1. Install Python dependencies
 
 ```shell
-pip install strands-agents strands-agents-tools
+pip install -e ".[dev]"
 ```
 
-2. Install and run Ollama
+### 2. Install and run Ollama
 
 ```shell
 curl -fsSL https://ollama.com/install.sh | sh
 ollama serve
 ```
 
-3. Pull the DeepSeek model
+### 3. Pull the required models
 
 ```shell
-ollama pull deepseek-coder-v2:latest
+ollama pull llama3.1:8b               # for the hello-world agent
+ollama pull deepseek-coder-v2:latest  # for code review
 ```
 
-📁 Project Structure
+## 📁 Project Structure
 
-my_agent/
-│
-├── code_review_agent.py
-├── parallel_review.py
-├── tools/
-│   └── repo_walker.py
-├── django_code_review.prompt
-└── .reviewignore   (optional)
+```
+my_strands_agents/
+├── __init__.py
+├── agent.py                  # letter_counter tool + hello-world main()
+├── code_review/
+│   ├── __init__.py
+│   ├── agent.py              # build_agent, review_code, load_prompt, main()
+│   └── parallel.py           # review_files_in_parallel
+├── prompts/
+│   ├── django_code_review.prompt
+│   ├── diagrams_icons_metadata_review.prompt
+│   └── diagrams_project_review.prompt
+└── tools/
+    ├── __init__.py
+    └── repo_walker.py        # walk_repository tool
 
-📝 Ignore File (.reviewignore)
+tests/
+├── test_agent.py
+├── test_code_review.py
+├── test_parallel.py
+└── test_repo_walker.py
 
-Create a .reviewignore file in your repo to exclude files or directories:
+pyproject.toml
+.reviewignore                 # optional – exclude paths from review
+```
 
+## 📝 Ignore File (`.reviewignore`)
 
-Glob patterns are supported.
-🧠 Running the Agent
-▶ Review a single file
+Create a `.reviewignore` file in the repository you are reviewing to exclude files or directories.
+Glob patterns (as understood by `pathlib.Path.match`) are supported.
+
+## 🧠 Running the Agents
+
+### Hello-world agent
 
 ```shell
-python code_review_agent.py path/to/file.py
+python -m my_strands_agents.agent
+# or after pip install -e .
+strands-agent
 ```
 
-▶ Review an entire repository
+### ▶ Review a single file
 
 ```shell
-python code_review_agent.py /path/to/repo
+code-review path/to/file.py
 ```
 
-▶ Review a cloned GitHub repo
+### ▶ Review an entire repository
 
 ```shell
-git clone https://github.com/your/repo.git
-python code_review_agent.py repo/
+code-review /path/to/repo
 ```
 
-▶ Use a custom prompt file
+### ▶ Use a custom prompt file
 
 ```shell
-python code_review_agent.py repo/ --prompt django_code_review.prompt
+code-review repo/ --prompt /path/to/my.prompt
 ```
 
-⚡ Parallel Review
-
-Enable parallel processing for large repositories, not tested:
+### ⚡ Parallel Review
 
 ```shell
-python code_review_agent.py repo/ --parallel
+code-review repo/ --parallel --workers 8
 ```
 
-Specify number of workers, not tested:
+### 🧪 Add Extra Context (Optional)
 
 ```shell
-python code_review_agent.py repo/ --parallel --workers 8
+code-review repo/ --context "This is the billing service."
 ```
 
-🧩 Repo Walking Tool
+## 🧪 Running Tests
 
-The agent automatically:
-
-    walks the directory
-
-    loads ignore patterns from .reviewignore
-
-    filters Python files
-
-    sends them to the model for review
-
-No extra configuration needed.
-
-🧪 Add Extra Context (Optional)
-
-You can pass additional context to help the model understand the module:
-bash
-
-python code_review_agent.py repo/ --context "This is the billing service."
+```shell
+pytest
+```
 

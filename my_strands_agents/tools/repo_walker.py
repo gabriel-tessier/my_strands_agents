@@ -1,8 +1,8 @@
-# file: tools/repo_walker.py
-
 from __future__ import annotations
+
 from pathlib import Path
 from typing import List
+
 from strands import tool
 
 
@@ -10,6 +10,7 @@ IGNORE_FILE_NAME = ".reviewignore"
 
 
 def load_ignore_patterns(root: Path) -> List[str]:
+    """Load glob patterns from a .reviewignore file in *root*, if present."""
     ignore_file = root / IGNORE_FILE_NAME
     if not ignore_file.is_file():
         return []
@@ -23,6 +24,7 @@ def load_ignore_patterns(root: Path) -> List[str]:
 
 
 def should_ignore(path: Path, patterns: List[str]) -> bool:
+    """Return True if *path* matches any of the glob *patterns*."""
     for pattern in patterns:
         if path.match(pattern):
             return True

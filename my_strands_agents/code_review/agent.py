@@ -1,5 +1,3 @@
-# file: code_review_agent.py
-
 from __future__ import annotations
 
 import argparse
@@ -8,21 +6,23 @@ from pathlib import Path
 from strands import Agent
 from strands.models.ollama import OllamaModel
 
-from tools.repo_walker import walk_repository
-from parallel_review import review_files_in_parallel
+from ..tools.repo_walker import walk_repository
+from .parallel import review_files_in_parallel
 
 
 # ============================================================
 # CONFIGURATION CONSTANTS
 # ============================================================
 
-PROMPT_FILE = "django_code_review.prompt"   # Your prompt file
-OLLAMA_MODEL = "deepseek-coder-v2:latest"      # Change to 32b or latest if needed
-OLLAMA_URL = "http://localhost:11434"       # Default Ollama endpoint
+_PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
+PROMPT_FILE = _PROMPTS_DIR / "django_code_review.prompt"
 
-# Optional: tweak model behavior
+OLLAMA_MODEL = "deepseek-coder-v2:latest"
+OLLAMA_URL = "http://localhost:11434"
+
 MODEL_TEMPERATURE = 0.7
-MODEL_NUM_CTX = 160000   # DeepSeek supports 160k context
+MODEL_NUM_CTX = 160000  # DeepSeek supports 160k context
+
 # ============================================================
 
 
@@ -31,7 +31,7 @@ def load_prompt(path: str | Path) -> str:
     p = Path(path)
     if not p.is_file():
         raise FileNotFoundError(f"Prompt file not found: {p}")
-    print('Loaded system prompt from:', p)
+    print("Loaded system prompt from:", p)
     return p.read_text(encoding="utf-8").strip()
 
 
@@ -39,13 +39,12 @@ def build_agent() -> Agent:
     """
     Create a Strands agent that uses Ollama + DeepSeek for Django/AWS code review.
     """
-
     return Agent(
         model=OllamaModel(
             host=OLLAMA_URL,
             model_id=OLLAMA_MODEL,
             temperature=MODEL_TEMPERATURE,
-            max_tokens=MODEL_NUM_CTX,  # Ensure we can utilize the full context window
+            max_tokens=MODEL_NUM_CTX,
             keep_alive="10m",
             options={"top_k": 40},
         )
@@ -86,10 +85,12 @@ def review_code(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run DeepSeek code review via Strands + Ollama.")
+    parser = argparse.ArgumentParser(
+        description="Run DeepSeek code review via Strands + Ollama."
+    )
     parser.add_argument("path", help="Path to a file OR directory to review.")
     parser.add_argument("--context", default=None)
-    parser.add_argument("--prompt", default=PROMPT_FILE)
+    parser.add_argument("--prompt", default=str(PROMPT_FILE))
     parser.add_argument("--parallel", action="store_true", help="Enable parallel review")
     parser.add_argument("--workers", type=int, default=4, help="Parallel workers")
     args = parser.parse_args()
@@ -97,7 +98,7 @@ def main() -> None:
     target = Path(args.path)
 
     # ---------------------------------------------------------
-    # CASE 1: Directory → use RepoWalkerTool
+    # CASE 1: Directory → use walk_repository
     # ---------------------------------------------------------
     if target.is_dir():
         print(f"Walking repository: {target}")
